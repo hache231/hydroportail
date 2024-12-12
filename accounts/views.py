@@ -19,7 +19,7 @@ def login_view(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return HttpResponse('You are now logged in.')
+            return redirect('map')
         else:
             return HttpResponse('Invalid username or password.')
     else:
