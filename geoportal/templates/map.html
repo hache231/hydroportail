@@ -7,9 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
-        #map {
-            height: 100vh;
-        }
+        #map { height: 100vh;}
     </style>
 </head>
 <body class="bg-gray-100">
@@ -57,12 +55,25 @@
         <div class="flex-1 flex flex-col">
             <!-- Navbar -->
             <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
-                <div class="text-lg font-semibold">Geoportal</div>
-                <div>
+                <div class="text-lg font-semibold">HydroPortail</div>
+                <div class="hidden md:flex">
                     <!-- Add navbar items here -->
-                    <a href="#" class="text-gray-300 hover:text-white px-3">Home</a>
-                    <a href="#" class="text-gray-300 hover:text-white px-3">About</a>
+                    <a href="{% url 'map'  %}" class="text-gray-300 hover:text-white px-3">Accueil</a>
+                    <a href="{% url 'about'  %}" class="text-gray-300 hover:text-white px-3">Apropos</a>
+                    <a href="{% url 'logout'  %}" class="text-gray-300 hover:text-white px-3">Deconnexion</a>
                 </div>
+                <div class="md:hidden">
+                    <button id="menu-button" class="text-gray-300 hover:text-white focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="bg-gray-900 hidden md:hidden">
+                <a href="{% url 'map'  %}" class="block text-white hover:text-white px-3 py-2">Accueil</a>
+                <a href="{% url 'about'  %}" class="block text-white hover:text-white px-3 py-2">Apropos</a>
+                <a href="{% url 'logout'  %}" class="block text-white hover:text-white px-3 py-2">Deconnexion</a>
             </div>
             <!-- Map content -->
             <div id="map" class="flex-1"></div>
@@ -88,6 +99,15 @@
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
+        document.getElementById('menu-button').addEventListener('click', function() {
+            var menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+            }
+        });
+
         var map = L.map('map').setView([-4.394587,15.3076858], 14);
 
         var layer1 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
