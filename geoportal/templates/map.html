@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geoportal Map</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white flex flex-col">
+            <div class="p-4 text-lg font-semibold border-b border-gray-700">Map Layers</div>
+            <div class="flex-1 overflow-y-auto p-4">
+                <!-- list of layer here -->
+                <div class="mb-4">
+                    <label class="block mb-2">Layer 1</label>
+                    <input type="checkbox" class="form-checkbox" id="layer1">
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2">Layer 2</label>
+                    <input type="checkbox" class="form-checkbox" id="layer2">
+                </div>
+            </div>
+            <hr class="border-gray-700 my-4">
+            <div class="p-4">
+                <label for="filter" class="block mb-2">Fitre d'adresses</label>
+                <input type="text" id="filter" class="form-input w-full mb-4 text-black" placeholder="Type to filter...">
+                <div class="overflow-y-auto h-64">
+                    <ul id="addressList" class="list-disc pl-5">
+                        <li>Address 1</li>
+                        <li>Address 2</li>
+                        <li>Address 3</li>
+                        <li>Address 4</li>
+                        <li>Address 5</li>
+                        <li>Address 6</li>
+                        <li>Address 7</li>
+                        <li>Address 8</li>
+                        <li>Address 9</li>
+                        <li>Address 10</li>
+                        <li>Address 11</li>
+                        <li>Address 12</li>
+                        <li>Address 13</li>
+                        <li>Address 14</li>
+                        <li>Address 15</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Main content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Navbar -->
+            <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
+                <div class="text-lg font-semibold">Geoportal</div>
+                <div>
+                    <!-- Add navbar items here -->
+                    <a href="#" class="text-gray-300 hover:text-white px-3">Home</a>
+                    <a href="#" class="text-gray-300 hover:text-white px-3">About</a>
+                </div>
+            </div>
+            <!-- Map content -->
+            <div id="map" class="flex-1"></div>
+        </div>
+    </div>
+
+    <!-- Modal HTML -->
+    <div id="markerModal" class="fixed inset-0 overflow-y-auto" style="z-index:500!important; display: none;">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white p-4 rounded shadow-lg">
+                <div class="flex justify-between items-center border-b pb-2 mb-4">
+                    <h2 class="text-xl font-semibold">Marker Information</h2>
+                    <button id="closeModal" class="text-gray-500 hover:text-gray-700">&times;</button>
+                </div>
+                <div>
+                    <!-- Add your modal content here -->
+                    <p>This is the information about the marker.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([-4.394587,15.3076858], 14);
+
+        var layer1 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var layer2 = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            maxZoom: 17,
+            attribution: 'Map data: &copy; <a href="https://www.opentopomap.org">OpenTopoMap</a> contributors'
+        });
+
+        document.getElementById('layer1').addEventListener('change', function() {
+            if (this.checked) {
+                map.addLayer(layer1);
+            } else {
+                map.removeLayer(layer1);
+            }
+        });
+
+        document.getElementById('layer2').addEventListener('change', function() {
+            if (this.checked) {
+                map.addLayer(layer2);
+            } else {
+                map.removeLayer(layer2);
+            }
+        });
+
+        var customIcon = L.icon({
+            iconUrl: 'data:image/png;base64,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',
+            iconSize: [38, 38], // size of the icon
+            iconAnchor: [22, 38], // point of the icon which will correspond to marker's location
+            popupAnchor: [-3, -38] // point from which the popup should open relative to the iconAnchor
+        });
+    
+        var marker = L.marker([-4.394587, 15.3076858], { icon: customIcon }).addTo(map);
+    
+        marker.on('click', function() {
+            var modal = document.getElementById('markerModal');
+            modal.style.display = 'block';
+            console.log('Marker clicked');
+        });
+    
+        document.getElementById('closeModal').addEventListener('click', function() {
+            var modal = document.getElementById('markerModal');
+            modal.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
+
+
