@@ -70,9 +70,6 @@
                         </svg>
                     </button>
                 </div>
-                <button id="geolocate-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-4">
-                    Geolocate
-                </button>
             </div>
             <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
                 <div class="flex space-x-4">
@@ -93,6 +90,9 @@
                         </select>
                     </div>
                     <div class="flex space-x-4">
+                        <label for="territory" class="block mb-2">secteur</label>
+                        <select id="territory" class="form-select text-black">
+                            <option value="territory1">secteur 1</option>
                             <option value="sector2">secteur 2</option>
                             <option value="sector3">secteur 3</option>
                         </select>
@@ -161,20 +161,52 @@
 
         var stationIcon = L.icon({
             iconUrl: "{% static 'markers/station_marker.png' %}",
-            iconSize: [45, 45], 
+            iconSize: [35, 35], 
+            iconAnchor: [22, 38], 
+            popupAnchor: [-3, -38] 
+        });
+        var depotIcon = L.icon({
+            iconUrl: "{% static 'markers/OIP.png' %}",
+            iconSize: [25, 25], 
+            iconAnchor: [22, 38], 
+            popupAnchor: [-3, -38] 
+        });
+        var detailIcon = L.icon({
+            iconUrl: "{% static 'markers/detaillant.png' %}",
+            iconSize: [20, 20], 
             iconAnchor: [22, 38], 
             popupAnchor: [-3, -38] 
         });
 
         {% for station in stations %}
+            {% if station.type_id == 1 %}
+            var marker = L.marker([{{ station.latitude }}, {{ station.longitude }}], { icon: depotIcon }).addTo(map);
+            marker.on('click', function() {
+                var modal = document.getElementById('markerModal');
+                var modalContent = document.getElementById('modalContent');
+                modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p>";
+                modal.style.display = 'block';
+                map.setView([{{ station.latitude }}, {{ station.longitude }}], 17);
+            });
+            {% elif station.type_id == 2 %}
             var marker = L.marker([{{ station.latitude }}, {{ station.longitude }}], { icon: stationIcon }).addTo(map);
             marker.on('click', function() {
                 var modal = document.getElementById('markerModal');
                 var modalContent = document.getElementById('modalContent');
                 modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p>";
                 modal.style.display = 'block';
-                map.setView([{{ station.latitude }}, {{ station.longitude }}], 14);
+                map.setView([{{ station.latitude }}, {{ station.longitude }}], 17);
             });
+            {% elif station.type_id == 3 %}
+            var marker = L.marker([{{ station.latitude }}, {{ station.longitude }}], { icon: detailIcon }).addTo(map);
+            marker.on('click', function() {
+                var modal = document.getElementById('markerModal');
+                var modalContent = document.getElementById('modalContent');
+                modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p>";
+                modal.style.display = 'block';
+                map.setView([{{ station.latitude }}, {{ station.longitude }}], 17);
+            });
+            {% endif %}
         {% endfor %}
 
         document.getElementById('closeModal').addEventListener('click', function() {
