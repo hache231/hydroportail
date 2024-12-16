@@ -180,9 +180,9 @@
             .then(data => {
                 data.forEach(station => {
                     var icon;
-                    if (station.type_id == 1) {
+                    if (station.type_id == 2) {
                         icon = stationIcon;
-                    } else if (station.type_id == 2) {
+                    } else if (station.type_id == 1) {
                         icon = depotIcon;
                     } else if (station.type_id == 3) {
                         icon = detailIcon;
