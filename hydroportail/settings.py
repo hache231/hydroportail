@@ -55,6 +55,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'hydroportail.urls'
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://3.19.37.176',
+    'http://127.0.0.1'
+]
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
