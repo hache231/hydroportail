@@ -202,7 +202,7 @@
             marker.on('click', function() {
                 var modal = document.getElementById('markerModal');
                 var modalContent = document.getElementById('modalContent');
-                modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p>";
+                modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p><p><b></b></p>";
                 modal.style.display = 'block';
                 map.setView([{{ station.latitude }}, {{ station.longitude }}], 17);
             });
