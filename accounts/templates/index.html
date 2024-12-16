@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geoportail Hydro</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="h-screen w-screen bg-blue-500 bg-cover bg-center flex items-center justify-center">
-    <div class="text-center">
-        <h1 class="text-white text-4xl mb-4">Bienvenue sur HydroPortail</h1>
+<body class="h-screen w-screen bg-yellow-100 bg-cover bg-center flex items-center justify-center">
+    <div class="text-center flex flex-col items-center justify-center">
+        <img src="{% static 'min_hydrocarbure.png' %}" class="w-100" alt="Min hydrocarbure">
+        <h3 class="text-2xl mb-4 text-black ">Bienvenue sur HydroPortail</h3>
         <a href="/login" class="bg-white text-blue-500 px-4 py-2 rounded">Se connecter</a>
     </div>
 </body>
