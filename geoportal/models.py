@@ -70,12 +70,3 @@ class Offrir(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
-server {
-listen 80;
-server_name 3.19.37.176;
-
-location / {
-    proxy_pass http://127.0.0.1:8000;
-}
-}
