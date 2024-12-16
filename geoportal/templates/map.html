@@ -8,14 +8,14 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
-        #map { height: 100vh;}
+        #map { height: 100vh; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50 text-gray-800">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div class="w-64 bg-gray-800 text-white flex flex-col">
-            <div class="p-4 text-lg font-semibold border-b border-gray-700">Map Layers</div>
+        <div class="w-64 bg-gray-100 text-gray-900 flex flex-col">
+            <div class="p-4 text-lg font-semibold border-b border-gray-300">Map Layers</div>
             <div class="flex-1 overflow-y-auto p-4">
                 <!-- list of layer here -->
                 <div class="mb-4 flex items-center">
@@ -27,12 +27,12 @@
                     <label for="layer2" class="text-sm">Layer 2</label>
                 </div>
             </div>
-            <hr class="border-gray-700 my-4">
+            <hr class="border-gray-300 my-4">
             <div class="p-4">
-                <label for="filter" class="block mb-2">Fitre d'adresses</label>
+                <label for="filter" class="block mb-2 font-medium">Fitre d'adresses</label>
                 <input type="text" id="filter" class="form-input w-full mb-4 text-black" placeholder="Type to filter...">
                 <div class="overflow-y-auto h-64">
-                    <ul id="addressList" class="list-disc pl-5">
+                    <ul id="addressList" class="list-disc pl-5 space-y-1">
                         <li>Address 1</li>
                         <li>Address 2</li>
                         <li>Address 3</li>
@@ -55,46 +55,46 @@
         <!-- Main content -->
         <div class="flex-1 flex flex-col">
             <!-- Navbar -->
-            <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
+            <div class="bg-gray-200 text-gray-900 p-4 flex justify-between items-center">
                 <div class="text-lg font-semibold">HydroPortail</div>
-                <div class="hidden md:flex">
+                <div class="hidden md:flex space-x-4">
                     <!-- Add navbar items here -->
-                    <a href="{% url 'map'  %}" class="text-gray-300 hover:text-white px-3">Accueil</a>
-                    <a href="{% url 'about'  %}" class="text-gray-300 hover:text-white px-3">Apropos</a>
-                    <a href="{% url 'logout'  %}" class="text-gray-300 hover:text-white px-3">Deconnexion</a>
+                    <a href="{% url 'map'  %}" class="text-gray-600 hover:text-gray-900">Accueil</a>
+                    <a href="{% url 'about'  %}" class="text-gray-600 hover:text-gray-900">Apropos</a>
+                    <a href="{% url 'logout'  %}" class="text-gray-600 hover:text-gray-900">Deconnexion</a>
                 </div>
                 <div class="md:hidden">
-                    <button id="menu-button" class="text-gray-300 hover:text-white focus:outline-none">
+                    <button id="menu-button" class="text-gray-600 hover:text-gray-900 focus:outline-none">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
                         </svg>
                     </button>
                 </div>
             </div>
-            <div class="bg-gray-900 text-white p-4 flex justify-between items-center">
+            <div class="bg-gray-200 text-gray-900 p-4 flex justify-between items-center">
                 <div class="flex space-x-4">
-                    <div class="flex space-x-4">
-                        <label for="province" class="block mb-2">Province</label>
+                    <div class="flex flex-col">
+                        <label for="province" class="block mb-2 font-medium">Province</label>
                         <select id="province" class="form-select text-black">
                             <option value="province1">Province 1</option>
                             <option value="province2">Province 2</option>
                             <option value="province3">Province 3</option>
                         </select>
                     </div>
-                    <div class="flex space-x-4">
-                        <label for="territory" class="block mb-2">Territoire</label>
+                    <div class="flex flex-col">
+                        <label for="territory" class="block mb-2 font-medium">Territoire</label>
                         <select id="territory" class="form-select text-black">
                             <option value="territory1">Territoire 1</option>
                             <option value="territory2">Territoire 2</option>
                             <option value="territory3">Territoire 3</option>
                         </select>
                     </div>
-                    <div class="flex space-x-4">
-                        <label for="territory" class="block mb-2">secteur</label>
-                        <select id="territory" class="form-select text-black">
-                            <option value="territory1">secteur 1</option>
-                            <option value="sector2">secteur 2</option>
-                            <option value="sector3">secteur 3</option>
+                    <div class="flex flex-col">
+                        <label for="sector" class="block mb-2 font-medium">Secteur</label>
+                        <select id="sector" class="form-select text-black">
+                            <option value="sector1">Secteur 1</option>
+                            <option value="sector2">Secteur 2</option>
+                            <option value="sector3">Secteur 3</option>
                         </select>
                     </div>
                 </div>
@@ -121,17 +121,7 @@
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        //screen responsive navbar 
-        document.getElementById('menu-button').addEventListener('click', function() {
-            var menu = document.getElementById('mobile-menu');
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-            } else {
-                menu.classList.add('hidden');
-            }
-        });
-
-        var map = L.map('map').setView([-4.394587,15.3076858], 14);
+        var map = L.map('map').setView([-4.394587, 15.3076858], 14);
 
         var layer1 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -159,55 +149,54 @@
             }
         });
 
-        var stationIcon = L.icon({
-            iconUrl: "{% static 'markers/station_marker.png' %}",
-            iconSize: [35, 35], 
-            iconAnchor: [22, 38], 
-            popupAnchor: [-3, -38] 
-        });
-        var depotIcon = L.icon({
-            iconUrl: "{% static 'markers/OIP.png' %}",
-            iconSize: [25, 25], 
-            iconAnchor: [22, 38], 
-            popupAnchor: [-3, -38] 
-        });
-        var detailIcon = L.icon({
-            iconUrl: "{% static 'markers/detaillant.png' %}",
-            iconSize: [20, 20], 
-            iconAnchor: [22, 38], 
-            popupAnchor: [-3, -38] 
+        const pointIcon = L.Icon.extend({
+            options: {
+                shadowUrl: "",
+                iconSize:     [30, 35],
+                shadowSize:   [50, 64],
+                iconAnchor:   [22, 94],
+                shadowAnchor: [4, 62],
+                popupAnchor:  [-3, -76]
+            }
         });
 
-        {% for station in stations %}
-            {% if station.type_id == 1 %}
-            var marker = L.marker([{{ station.latitude }}, {{ station.longitude }}], { icon: depotIcon }).addTo(map);
-            marker.on('click', function() {
-                var modal = document.getElementById('markerModal');
-                var modalContent = document.getElementById('modalContent');
-                modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p>";
-                modal.style.display = 'block';
-                map.setView([{{ station.latitude }}, {{ station.longitude }}], 17);
+        const stationIcon = new pointIcon({iconUrl: "{% static 'station_marker.png' %}"});
+        var depotIcon = L.icon({
+            iconUrl: "{% static 'OIP.png' %}",
+            iconSize: [25, 25], 
+            iconAnchor: [12, 12], 
+            popupAnchor: [0, -12] 
+        });
+        var detailIcon = L.icon({
+            iconUrl: "{% static 'detaillant.png' %}",
+            iconSize: [20, 20], 
+            iconAnchor: [10, 10], 
+            popupAnchor: [0, -10] 
+        });
+
+        // Fetch station data from the API
+        fetch('/geoportal/api/stations/')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(station => {
+                    var icon;
+                    if (station.type_id == 1) {
+                        icon = stationIcon;
+                    } else if (station.type_id == 2) {
+                        icon = depotIcon;
+                    } else if (station.type_id == 3) {
+                        icon = detailIcon;
+                    }
+                    var marker = L.marker([station.latitude, station.longitude], { icon: icon }).addTo(map);
+                    marker.on('click', function() {
+                        var modal = document.getElementById('markerModal');
+                        var modalContent = document.getElementById('modalContent');
+                        modalContent.innerHTML = `<p><b>Nom :</b> ${station.name}</p><p><b>Proprietaire :</b> ${station.owner}</p>`;
+                        modal.style.display = 'block';
+                        map.setView([station.latitude, station.longitude], 17);
+                    });
+                });
             });
-            {% elif station.type_id == 2 %}
-            var marker = L.marker([{{ station.latitude }}, {{ station.longitude }}], { icon: stationIcon }).addTo(map);
-            marker.on('click', function() {
-                var modal = document.getElementById('markerModal');
-                var modalContent = document.getElementById('modalContent');
-                modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p>";
-                modal.style.display = 'block';
-                map.setView([{{ station.latitude }}, {{ station.longitude }}], 17);
-            });
-            {% elif station.type_id == 3 %}
-            var marker = L.marker([{{ station.latitude }}, {{ station.longitude }}], { icon: detailIcon }).addTo(map);
-            marker.on('click', function() {
-                var modal = document.getElementById('markerModal');
-                var modalContent = document.getElementById('modalContent');
-                modalContent.innerHTML = "<p><b>Nom :</b> {{ station.name }}</p><p><b>Proprietaire :</b> {{ station.owner }}</p><p><b></b></p>";
-                modal.style.display = 'block';
-                map.setView([{{ station.latitude }}, {{ station.longitude }}], 17);
-            });
-            {% endif %}
-        {% endfor %}
 
         document.getElementById('closeModal').addEventListener('click', function() {
             var modal = document.getElementById('markerModal');
@@ -232,5 +221,3 @@
     </script>
 </body>
 </html>
-
-
