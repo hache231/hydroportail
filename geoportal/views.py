@@ -14,3 +14,4 @@ def station_data(request):
     stations = station.objects.all()
     station_list = list(stations.values('name', 'owner', 'latitude', 'longitude', 'type_id'))
     return JsonResponse(station_list, safe=False)
+
