@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_top">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title> HydroPortail</title>
+    
+    <link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+    <link href="https://unpkg.com/tailwindcss@^2.0/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        #map {
+            height: 100vh;
+        }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col" style="height: 100vh; width: 100%;">
+
+<!-- Navbar -->
+<nav class="bg-blue-500 p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <div class="text-white text-lg font-bold">hydroportail</div>
+        <div class="hidden md:flex space-x-4">
+            <a href="#" class="text-white">Accueil</a>
+            <a href="{% url 'map' %}" class="text-white">Map</a>
+            <a href="{% url 'about' %}" class="text-white">Apropos</a>
+            <a href="#" class="text-white">FAQ</a>
+            <a href="{% url 'logout' %}" class="text-white">Deconnexion</a>
+        </div>
+        <button class="text-white md:hidden" id="menu-button">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+    </div>
+    <div class="hidden md:flex md:space-x-4 md:hidden" id="menu">
+        <a href="#" class="block text-white md:inline-block">Accueil</a>
+        <a href="#" class="block text-white md:inline-block">Map</a>
+        <a href="#" class="block text-white md:inline-block">Apropos</a>
+        <a href="#" class="block text-white md:inline-block">FAQ</a>
+        <a href="#" class="block text-white md:inline-block">Deconnexion</a>
+    </div>
+</nav>
+
+{% block content %}
+{% endblock %}
+<!-- Footer -->
+<footer class="bg-gray-200 text-gray-900 text-center p-4">
+    <div class="container mx-auto">
+        &copy; 2024 hydroportail. Tous droits reservees.
+    </div>
+</footer>
+{% block scripts %}
+{% endblock %}
+</body>
+</html>

@@ -7,11 +7,10 @@ def about(request):
     return render(request, 'about.html')
 
 def map(request):
-    stations = station.objects.all()
-    return render(request, 'map.html', {'stations': stations})
+    return render(request, 'carte.html')
 
 def station_data(request):
     stations = station.objects.all()
-    station_list = list(stations.values('name', 'owner', 'latitude', 'longitude', 'type_id'))
+    station_list = list(stations.values('name', 'owner', 'latitude', 'longitude', 'type_id','state', 'Storage_capacity', 'Opening_hours', 'closing_hours'))
     return JsonResponse(station_list, safe=False)
 
