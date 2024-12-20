@@ -8,3 +8,4 @@ urlpatterns = [
     path('geoportal/', include('geoportal.urls')),
 ] 
 
+handler = 'accounts.views.custom_404_view'

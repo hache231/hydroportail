@@ -13,10 +13,13 @@ def  index(request):
     return render(request, 'index.html')
 
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('map')
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
-        username=request.POST['username']
-        password=request.POST['password']
+        username = request.POST['username']
+        password = request.POST['password']
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
@@ -61,3 +64,6 @@ def sign_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+def custom_404_view(request, exception):
+    return render(request, '404.html', status=404)

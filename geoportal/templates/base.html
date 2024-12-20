@@ -44,10 +44,10 @@
     </div>
     <div class="hidden md:flex md:space-x-4 md:hidden" id="menu">
         <a href="#" class="block text-white md:inline-block">Accueil</a>
-        <a href="#" class="block text-white md:inline-block">Map</a>
-        <a href="#" class="block text-white md:inline-block">Apropos</a>
+        <a href="{% url 'map' %}" class="block text-white md:inline-block">Map</a>
+        <a href="{% url 'about' %}" class="block text-white md:inline-block">Apropos</a>
         <a href="#" class="block text-white md:inline-block">FAQ</a>
-        <a href="#" class="block text-white md:inline-block">Deconnexion</a>
+        <a href="{% url 'logout' %}" class="block text-white md:inline-block">Deconnexion</a>
     </div>
 </nav>
 

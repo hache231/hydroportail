@@ -7,6 +7,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('map/', views.map, name='map'),
     path('api/stations/', views.station_data, name='station_data'),
+    path('api/stations/<int:pk>/', views.stations_by_sector, name='filterd_station_data'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
