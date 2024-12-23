@@ -18,7 +18,7 @@ def map(request):
 @login_required(login_url='/login/')
 def station_data(request):
     stations = station.objects.all()
-    station_list = list(stations.values('name', 'owner', 'latitude', 'longitude', 'type_id', 'state', 'storage_capacity', 'opening_hours', 'closing_hours', 'province_id', 'territory_id', 'sector_id'))
+    station_list = list(stations.values('name', 'owner', 'physical_adresse','latitude', 'longitude', 'type_id', 'state', 'storage_capacity', 'opening_hours', 'closing_hours', 'province_id', 'territory_id', 'sector_id'))
     return JsonResponse(station_list, safe=False)
 
 @login_required(login_url='/login/')
