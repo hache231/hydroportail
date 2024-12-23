@@ -1,6 +1,7 @@
+<!-- filepath: /Users/idris/Documents/hydroportail/geoportal/templates/carte.html -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="fixed inset-x-0 top-20 flex items-center justify-center" style='z-index: 1000;'>
+<div id="filter" class="fixed inset-x-0 top-20 flex items-center justify-center" style='z-index: 1000;'>
     <div class="bg-white p-4 rounded shadow-lg flex space-x-4">
         <div>
             <label for="province" class="block text-sm font-medium text-gray-700">Province</label>
@@ -15,67 +16,38 @@
             <label for="territoire" class="block text-sm font-medium text-gray-700">Territoire</label>
             <select id="territoire" name="territoire" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 <option value="">Tous</option>
-                {% for territoire in territories %}
-                    <option value="{{ territoire.id }}">{{ territoire.territory_name }}</option>
-                {% endfor %}
             </select>
         </div>
         <div>
             <label for="secteur" class="block text-sm font-medium text-gray-700">Secteur</label>
             <select id="secteur" name="secteur" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 <option value="">Tous</option>
-                {% for secteur in sectors %}
-                    <option value="{{ secteur.id }}">{{ secteur.sector_name }}</option>
-                {% endfor %}
             </select>
         </div>
-    </div>
+        <div class="flex items-center justify-center">
+            <a href="{% url 'map' %}" id="Reinitialiser" class="bg-green-500 hover:bg-green-700 text-white font-bold text-center  p-4 rounded h-full text-lg">Reinitialiser</a>
+        </div>
+    </div> 
 </div>
 <div id='map' class="flex-grow"></div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-document.getElementById('province').addEventListener('change', function() {
-    const provinceId = this.value;
-    fetch(`/geoportal/api/territories/${provinceId}`)
-        .then(response => response.json())
-        .then(data => {
-            const territoireSelect = document.getElementById('territoire');
-            territoireSelect.innerHTML = '<option value="">Tous</option>';
-            data.territories.forEach(territoire => {
-                territoireSelect.insertAdjacentHTML('beforeend', `<option value="${territoire.id}">${territoire.territory_name}</option>`);
-            });
-            const secteurSelect = document.getElementById('secteur');
-            secteurSelect.innerHTML = '<option value="">Tous</option>';
-            data.sectors.forEach(secteur => {
-                secteurSelect.insertAdjacentHTML('beforeend', `<option value="${secteur.id}">${secteur.sector_name}</option>`);
-            });
-        })
-        .catch(error => console.error('Error fetching territories and sectors:', error));
+
+//navbar toggle
+
+document.getElementById('menu-button').addEventListener('click', function() {
+    var menu = document.getElementById('menu');
+    menu.classList.toggle('hidden');
+    var filter = document.getElementById('filter');
+    filter.classList.toggle('hidden');
 });
 
-
-document.getElementById('territoire').addEventListener('change', function() {
-    const territoireId = this.value;
-    fetch(`/geoportal/api/sectors/${territoireId}`)
-        .then(response => response.json())
-        .then(data => {
-            const secteurSelect = document.getElementById('secteur');
-            secteurSelect.innerHTML = '<option value="">Tous</option>';
-            data.forEach(secteur => {
-                secteurSelect.insertAdjacentHTML('beforeend', `<option value="${secteur.id}">${secteur.sector_name}</option>`);
-            });
-        })
-        .catch(error => console.error('Error fetching sectors:', error));
-});
-
-
-
-
-const station = L.layerGroup([]);
-const depot = L.layerGroup([]);
-const detaillant = L.layerGroup([]);
+// Leaflet map
+const stationLayer = L.layerGroup([]);
+const depotLayer = L.layerGroup([]);
+const detaillantLayer = L.layerGroup([]);
 
 const icons = {
     1: L.icon({ iconUrl: 'https://s6.imgcdn.dev/JhHGT.png', iconSize: [25, 30], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
@@ -83,65 +55,13 @@ const icons = {
     default: L.icon({ iconUrl: 'https://s6.imgcdn.dev/JhFNt.png', iconSize: [25, 26], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] })
 };
 
-// chargement des données lors du demarrage de l'application
+// Fetch station data from the API
 fetch('/geoportal/api/stations/')
     .then(response => response.json())
     .then(data => {
-        data.forEach(item => {
-            const icon = icons[item.type_id] || icons.default;
-            const layer = item.type_id == 1 ? depot : item.type_id == 2 ? station : detaillant;
-            const marker = L.marker([item.latitude, item.longitude], { icon }).addTo(layer);
-            marker.on('click', () => {
-                const modalContent = `
-                    <div class="fixed inset-0 flex items-center justify-center" style="z-index: 5000;">
-                        <div class="bg-white p-4 rounded shadow-lg">
-                            <h2 class="text-xl font-bold mb-4">${item.name}</h2>
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Proprietaire</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.owner}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Addresse</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.physical_address}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Etat</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.state}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capacite</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Storage_capacity}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Ouverture</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Opening_hours}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Fermeture</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.closing_hours}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full" onclick="closeModal()">Close</button>
-                        </div>
-                    </div>
-                    <div class="fixed inset-0 bg-black opacity-50 z-40" onclick="closeModal()"></div>
-                `;
-                map.setView([item.latitude, item.longitude], 15);
-                document.body.insertAdjacentHTML('beforeend', modalContent);
-            });
-        });
-    })
-    .catch(error => console.error('Error fetching station data:', error));
-
-function closeModal() {
-    const modal = document.querySelector('.fixed.inset-0.flex.items-center.justify-center');
-    const overlay = document.querySelector('.fixed.inset-0.bg-black.opacity-50.z-40');
-    if (modal) modal.remove();
-    if (overlay) overlay.remove();
-}
+        stationsData = data;
+        updateMarkers();
+    });
 
 const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -156,7 +76,7 @@ const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.pn
 const map = L.map('map', {
     center: [-4.394587, 15.3076858],
     zoom: 10,
-    layers: [osm, station]
+    layers: [osm, stationLayer]
 });
 
 const baseLayers = {
@@ -165,9 +85,9 @@ const baseLayers = {
 };
 
 const overlays = {
-    'Stations': station,
-    'Depots': depot,
-    'detaillant': detaillant
+    'Stations': stationLayer,
+    'Depots': depotLayer,
+    'Detaillant': detaillantLayer
 };
 
 const layerControl = L.control.layers(baseLayers, overlays).addTo(map);
@@ -178,78 +98,165 @@ const openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.pn
 });
 
 layerControl.addBaseLayer(openTopoMap, 'OpenTopoMap');
+let stationsData = [];
 
-//navbar toggle
+function updateMarkers() {
+    stationLayer.clearLayers();
+    depotLayer.clearLayers();
+    detaillantLayer.clearLayers();
 
-document.getElementById('menu-button').addEventListener('click', function() {
-    var menu = document.getElementById('menu');
-    menu.classList.toggle('hidden');
+    const selectedProvince = document.getElementById('province').value;
+    const selectedTerritory = document.getElementById('territoire').value;
+    const selectedSector = document.getElementById('secteur').value;
+
+    stationsData.forEach(station => {
+        if ((selectedProvince === "" || station.province_id == selectedProvince) &&
+            (selectedTerritory === "" || station.territory_id == selectedTerritory) &&
+            (selectedSector === "" || station.sector_id == selectedSector)) {
+            const icon = icons[station.type_id] || icons.default;
+            const layer = station.type_id == 1 ? depotLayer : station.type_id == 2 ? stationLayer : detaillantLayer;
+            const marker = L.marker([station.latitude, station.longitude], { icon }).addTo(layer);
+            marker.on('click', () => {
+                const modalContent = `
+                    <div class="fixed inset-0 flex items-center justify-center" style="z-index: 5000;">
+                        <div class="bg-white p-4 rounded shadow-lg">
+                            <h2 class="text-xl font-bold mb-4">${station.name}</h2>
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Proprietaire</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${station.owner}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Addresse</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${station.physical_adresse}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Etat</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${station.state}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capacite</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${station.storage_capacity}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Ouverture</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${station.opening_hours}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Fermeture</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${station.closing_hours}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full" onclick="closeModal()">Close</button>
+                        </div>
+                    </div>
+                    <div class="fixed inset-0 bg-black opacity-50 z-40" onclick="closeModal()"></div>
+                `;
+                map.setView([station.latitude, station.longitude], 15);
+                document.body.insertAdjacentHTML('beforeend', modalContent);
+            });
+        }
+    });
+}
+
+document.getElementById('province').addEventListener('change', function() {
+    const provinceId = this.value;
+
+    fetch(`/geoportal/api/territories/${provinceId}`)
+        .then(response => response.json())
+        .then(data => {
+            const territoireSelect = document.getElementById('territoire');
+            territoireSelect.innerHTML = '<option value="">Tous</option>';
+            data.territories.forEach(territoire => {
+                territoireSelect.insertAdjacentHTML('beforeend', `<option value="${territoire.id}">${territoire.territory_name}</option>`);
+            });
+
+            const sectorSelect = document.getElementById('secteur');
+            sectorSelect.innerHTML = '<option value="">Tous</option>';
+            data.sectors.forEach(secteur => {
+                sectorSelect.insertAdjacentHTML('beforeend', `<option value="${secteur.id}">${secteur.sector_name}</option>`);
+            });
+
+            updateMarkers();
+        })
+        .catch(error => console.error('Error fetching territories:', error));
 });
 
+document.getElementById('territoire').addEventListener('change', function() {
+    const territoireId = this.value;
+
+    if (territoireId) {
+        fetch(`/geoportal/api/sectors/${territoireId}`)
+            .then(response => response.json())
+            .then(data => {
+                const sectorSelect = document.getElementById('secteur');
+                sectorSelect.innerHTML = '<option value="">Tous</option>';
+                data.sectors.forEach(secteur => {
+                    sectorSelect.insertAdjacentHTML('beforeend', `<option value="${secteur.id}">${secteur.sector_name}</option>`);
+                });
+                data.province.forEach(province => {
+                const provinceSelect = document.getElementById('province');
+                provinceSelect.value = province.id;
+            });
+                updateMarkers();
+            })
+            .catch(error => console.error('Error fetching sectors:', error));
+    } else {
+        const sectorSelect = document.getElementById('secteur');
+        sectorSelect.innerHTML = '<option value="">Tous</option>';
+        updateMarkers();
+    }
+});
 
 
 document.getElementById('secteur').addEventListener('change', function() {
-    const secteurId = this.value;
-    console.log(secteurId)
-    fetch(`/geoportal/api/stations/${secteurId}`)
-        .then(response => response.json())
-        .then(data => {
-            station.clearLayers();
-            depot.clearLayers();
-            detaillant.clearLayers();
-            data.forEach(item => {
-                const icon = icons[item.type_id] || icons.default;
-                const layer = item.type_id == 1 ? depot : item.type_id == 2 ? station : detaillant;
-                const marker = L.marker([item.latitude, item.longitude], { icon }).addTo(layer);
-                marker.on('click', () => {
-                    const modalContent = `
-                        <div class="fixed inset-0 flex items-center justify-center" style="z-index: 5000;">
-                            <div class="bg-white p-4 rounded shadow-lg">
-                                <h2 class="text-xl font-bold mb-4">${item.name}</h2>
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Proprietaire</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.owner}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Addresse</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.physical_address}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Etat</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.state}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capacite</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Storage_capacity}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Ouverture</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Opening_hours}</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Fermeture</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.closing_hours}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full" onclick="closeModal()">Close</button>
-                            </div>
-                        </div>
-                        <div class="fixed inset-0 bg-black opacity-50 z-40" onclick="closeModal()"></div>
-                    `;
-                    map.setView([item.latitude, item.longitude], 15);
-                    document.body.insertAdjacentHTML('beforeend', modalContent);
+    const secteurID = this.value;
+
+    if (secteurID) {
+        fetch(`/geoportal/api/provinces_territories/${secteurID}`)
+            .then(response => response.json())
+            .then(data => {
+                data.provinces.forEach(province => {
+                    const provinceSelect = document.getElementById('province');
+                    provinceSelect.value = province.id;
                 });
-            });
-        })
-        .catch(error => console.error('Error fetching station data:', error));
+
+                data.territories.forEach(territoire => {
+                    const territoireSelect = document.getElementById('territoire');
+                    territoireSelect.value = territoire.id;
+                });
+
+                updateMarkers();
+            })
+            .catch(error => console.error('Error fetching provinces territories:', error));
+    } else {
+        updateMarkers();
+    }
 });
 
+function closeModal() {
+    const modal = document.querySelector('.fixed.inset-0.flex.items-center.justify-center');
+    const overlay = document.querySelector('.fixed.inset-0.bg-black.opacity-50.z-40');
+    if (modal) modal.remove();
+    if (overlay) overlay.remove();
+}
 
-
+// Geolocation functionality
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        const userMarker = L.marker([userLat, userLng]).addTo(map)
+            .bindPopup('vous')
+            .openPopup();
+        map.setView([userLat, userLng], 14);
+    }, function() {
+        alert('Geolocation failed.');
+    });
+} else {
+    alert('Nota : ce navigateur ne supporte pas la géolocalisation.');
+}
 </script>
 {% endblock %}
-</body>
-</html>

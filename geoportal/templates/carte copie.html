@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="fixed inset-x-0 top-20 flex items-center justify-center" style='z-index: 1000;'>
+    <div class="bg-white p-4 rounded shadow-lg flex space-x-4">
+        <div>
+            <label for="province" class="block text-sm font-medium text-gray-700">Province</label>
+            <select id="province" name="province" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="">Tous</option>
+                {% for province in provinces %}
+                    <option value="{{ province.id }}">{{ province.province_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="territoire" class="block text-sm font-medium text-gray-700">Territoire</label>
+            <select id="territoire" name="territoire" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="">Tous</option>
+
+            </select>
+        </div>
+        <div>
+            <label for="secteur" class="block text-sm font-medium text-gray-700">Secteur</label>
+            <select id="secteur" name="secteur" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="">Tous</option>
+            </select>
+        </div>
+        <div class="flex items-center justify-center">
+            <a href="{% url 'map' %}" id="Reinitialiser" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded h-full">Reinitialiser</a>
+        </div>
+    </div>
+</div>
+<div id='map' class="flex-grow"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+// Leaflet map
+const station = L.layerGroup([]);
+const depot = L.layerGroup([]);
+const detaillant = L.layerGroup([]);
+
+const icons = {
+    1: L.icon({ iconUrl: 'https://s6.imgcdn.dev/JhHGT.png', iconSize: [25, 30], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+    2: L.icon({ iconUrl: 'https://s6.imgcdn.dev/JjsQO.png', iconSize: [35, 27], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
+    default: L.icon({ iconUrl: 'https://s6.imgcdn.dev/JhFNt.png', iconSize: [25, 26], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] })
+};
+
+// chargement des données lors du demarrage de l'application
+fetch('/geoportal/api/stations/')
+    .then(response => response.json())
+    .then(data => {
+        data.forEach(item => {
+            const icon = icons[item.type_id] || icons.default;
+            const layer = item.type_id == 1 ? depot : item.type_id == 2 ? station : detaillant;
+            const marker = L.marker([item.latitude, item.longitude], { icon }).addTo(layer);
+            marker.on('click', () => {
+                const modalContent = `
+                    <div class="fixed inset-0 flex items-center justify-center" style="z-index: 5000;">
+                        <div class="bg-white p-4 rounded shadow-lg">
+                            <h2 class="text-xl font-bold mb-4">${item.name}</h2>
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Proprietaire</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.owner}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Addresse</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.physical_address}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Etat</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.state}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capacite</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Storage_capacity}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Ouverture</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Opening_hours}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Fermeture</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.closing_hours}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full" onclick="closeModal()">Close</button>
+                        </div>
+                    </div>
+                    <div class="fixed inset-0 bg-black opacity-50 z-40" onclick="closeModal()"></div>
+                `;
+                map.setView([item.latitude, item.longitude], 15);
+                document.body.insertAdjacentHTML('beforeend', modalContent);
+            });
+        });
+    })
+    .catch(error => console.error('Error fetching station data:', error));
+
+function closeModal() {
+    const modal = document.querySelector('.fixed.inset-0.flex.items-center.justify-center');
+    const overlay = document.querySelector('.fixed.inset-0.bg-black.opacity-50.z-40');
+    if (modal) modal.remove();
+    if (overlay) overlay.remove();
+}
+
+const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+});
+
+const osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>'
+});
+
+const map = L.map('map', {
+    center: [-4.394587, 15.3076858],
+    zoom: 10,
+    layers: [osm, station]
+});
+
+const baseLayers = {
+    'OpenStreetMap': osm,
+    'OpenStreetMap.HOT': osmHOT
+};
+
+const overlays = {
+    'Stations': station,
+    'Depots': depot,
+    'detaillant': detaillant
+};
+
+const layerControl = L.control.layers(baseLayers, overlays).addTo(map);
+
+const openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+});
+
+layerControl.addBaseLayer(openTopoMap, 'OpenTopoMap');
+
+//navbar toggle
+
+document.getElementById('menu-button').addEventListener('click', function() {
+    var menu = document.getElementById('menu');
+    menu.classList.toggle('hidden');
+});
+
+// Initial Fetch territories and sectors
+function fetchTerritories() {
+    fetch('/geoportal/api/territories/')
+        .then(response => response.json())
+        .then(data => {
+            const territoireSelect = document.getElementById('territoire');
+            territoireSelect.innerHTML = '<option value="">Tous</option>';
+            if (data.territories) {
+                data.territories.forEach(territoire => {
+                    territoireSelect.insertAdjacentHTML('beforeend', `<option value="${territoire.id}">${territoire.territory_name}</option>`);
+                });
+            }
+            console.log(data.territories);
+            const sectorSelect = document.getElementById('secteur');
+            sectorSelect.innerHTML = '<option value="">Tous</option>';
+            if (data.sectors) {
+                data.sectors.forEach(secteur => {
+                    sectorSelect.insertAdjacentHTML('beforeend', `<option value="${secteur.id}">${secteur.sector_name}</option>`);
+                });
+            }
+        })
+        .catch(error => console.error('Error fetching territories:', error));
+}
+fetchTerritories();
+
+
+document.getElementById('province').addEventListener('change', function() {
+    const provinceId = this.value;
+
+    fetch(`/geoportal/api/territories/${provinceId}`)
+        .then(response => response.json())
+        .then(data => {
+            const territoireSelect = document.getElementById('territoire');
+            territoireSelect.innerHTML = '';
+            data.territories.forEach(territoire => {
+                territoireSelect.insertAdjacentHTML('beforeend', `<option value="${territoire.id}">${territoire.territory_name}</option>`);
+            });
+            console.log(data.territories)
+            const sectorSelect = document.getElementById('secteur');
+            sectorSelect.innerHTML = '';
+            data.sectors.forEach(secteur => {
+                sectorSelect.insertAdjacentHTML('beforeend', `<option value="${secteur.id}">${secteur.sector_name}</option>`);
+            });
+        })
+        .catch(error => console.error('Error fetching territories:', error));
+});
+
+
+document.getElementById('territoire').addEventListener('change', function() {
+    const territoireId = this.value;
+    console.log(territoireId)
+    fetch(`/geoportal/api/sectors/${territoireId}`)
+        .then(response => response.json())
+        .then(data => {
+            const sectorSelect = document.getElementById('secteur');
+            sectorSelect.innerHTML = '';
+            data.sectors.forEach(secteur => {
+                sectorSelect.insertAdjacentHTML('beforeend', `<option value="${secteur.id}">${secteur.sector_name}</option>`);
+            });
+            data.province.forEach(province => {
+                const provinceSelect = document.getElementById('province');
+                provinceSelect.value = province.id;
+            });
+        })
+        .catch(error => console.error('Error fetching territories:', error));
+});
+
+
+document.getElementById('secteur').addEventListener('change', function() {
+    const secteurId = this.value;
+    console.log(secteurId)
+    fetch(`/geoportal/api/stations/${secteurId}`)
+        .then(response => response.json())
+        .then(data => {
+            station.clearLayers();
+            depot.clearLayers();
+            detaillant.clearLayers();
+            data.forEach(item => {
+                const icon = icons[item.type_id] || icons.default;
+                const layer = item.type_id == 1 ? depot : item.type_id == 2 ? station : detaillant;
+                const marker = L.marker([item.latitude, item.longitude], { icon }).addTo(layer);
+                marker.on('click', () => {
+                    const modalContent = `
+                        <div class="fixed inset-0 flex items-center justify-center" style="z-index: 5000;">
+                            <div class="bg-white p-4 rounded shadow-lg">
+                                <h2 class="text-xl font-bold mb-4">${item.name}</h2>
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Proprietaire</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.owner}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Addresse</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.physical_address}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Etat</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.state}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capacite</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Storage_capacity}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Ouverture</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.Opening_hours}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Fermeture</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.closing_hours}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded w-full" onclick="closeModal()">Close</button>
+                            </div>
+                        </div>
+                        <div class="fixed inset-0 bg-black opacity-50 z-40" onclick="closeModal()"></div>
+                    `;
+                    map.setView([item.latitude, item.longitude], 15);
+                    document.body.insertAdjacentHTML('beforeend', modalContent);
+                });
+            });
+        })
+        .catch(error => console.error('Error fetching station data:', error));
+});
+
+</script>
+{% endblock %}
+</body>
+</html>

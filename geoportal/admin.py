@@ -6,10 +6,17 @@ from .models import *
 class StationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ...
 
+class productAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...
+
+class serviceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...
+
+
 admin.site.register(station, StationAdmin)
-admin.site.register(product)
+admin.site.register(product, productAdmin)
 admin.site.register(source)
-admin.site.register(service)
+admin.site.register(service, serviceAdmin)
 admin.site.register(type)
 admin.site.register(Vendre)
 admin.site.register(Fournir)
