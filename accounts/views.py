@@ -14,7 +14,7 @@ def  index(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('map')
+        return redirect('home')
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -23,7 +23,7 @@ def login_view(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('map')
+            return redirect('home')
         else:
             return HttpResponse('Invalid username or password.')
     else:
@@ -55,7 +55,7 @@ def sign_view(request):
         
         user = authenticate(username=username, password=password)
         login(request, user)
-        return redirect('map')
+        return redirect('home')
     else:
         form = UserForm()
     return render(request, 'register.html', {'form': form})

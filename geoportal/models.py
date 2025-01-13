@@ -4,19 +4,25 @@ from django.db import models
 
 class provinces(models.Model):
     province_name = models.CharField(max_length=100)
+    p_cent_lat = models.FloatField(max_length=20, default="")
+    p_cent_long = models.FloatField(max_length=20, default="")
 
     def __str__(self):
-        return self.province_name
+        return str(self.pk) +" "+ self.province_name 
 
 class territories(models.Model):
     territory_name = models.CharField(max_length=100)
+    t_cent_lat = models.FloatField(max_length=20, default="")
+    t_cent_long = models.FloatField(max_length=20, default="")
     province = models.ForeignKey('provinces', on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.territory_name
+        return str(self.id) +" "+ self.territory_name
 
 class sectors(models.Model):
     sector_name = models.CharField(max_length=100)
+    s_cent_lat = models.FloatField(max_length=20, default="")
+    s_cent_long = models.FloatField(max_length=20, default="")
     territory = models.ForeignKey('territories', on_delete=models.CASCADE)
 
 

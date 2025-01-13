@@ -12,6 +12,14 @@ class productAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class serviceAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ...
 
+class ProvincesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...
+
+class TerritoriesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...
+
+class SectorsProvincesAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ...
 
 admin.site.register(station, StationAdmin)
 admin.site.register(product, productAdmin)
@@ -21,6 +29,6 @@ admin.site.register(type)
 admin.site.register(Vendre)
 admin.site.register(Fournir)
 admin.site.register(Offrir)
-admin.site.register(provinces)
-admin.site.register(territories)
-admin.site.register(sectors)
+admin.site.register(provinces, ProvincesAdmin)
+admin.site.register(territories, TerritoriesAdmin)
+admin.site.register(sectors, SectorsProvincesAdmin)

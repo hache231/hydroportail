@@ -29,7 +29,7 @@
     <div class="container mx-auto flex justify-between items-center">
         <div class="text-white text-lg font-bold"><a href="{% url 'map' %}">hydroportail</div>
         <div class="hidden md:flex space-x-4">
-            <a href="#" class="text-white">Accueil</a>
+            <a href="{% url 'home' %}" class="text-white">Accueil</a>
             <a href="{% url 'map' %}" class="text-white">Map</a>
             <a href="{% url 'about' %}" class="text-white">Apropos</a>
             <a href="#" class="text-white">FAQ</a>
@@ -42,7 +42,7 @@
         </button>
     </div>
     <div class="hidden md:flex md:space-x-4 md:hidden" id="menu" >
-        <a href="#" class="block text-white md:inline-block">Accueil</a>
+        <a href="{% url 'home' %}" class="block text-white md:inline-block">Accueil</a>
         <a href="{% url 'map' %}" class="block text-white md:inline-block">Map</a>
         <a href="{% url 'about' %}" class="block text-white md:inline-block">Apropos</a>
         <a href="#" class="block text-white md:inline-block">FAQ</a>
